@@ -23,31 +23,28 @@ echo $output_neg_file
 
 mkdir -p $output_dir
 if [[ -f $output_pos_file ]]; then
-    echo '1'
     rm $output_pos_file
 fi
 if [[ -f $output_neg_file ]]; then
-    echo '2'
     rm $output_neg_file
 fi
 
-selector_regex="^\.([^\ ]*)\ "
+selector_regex="^\.([^\ ]*)[,\ ]"
+while read line; do
+    # selector does not update unless a positive match occurs
+    [[ "$line" =~ $selector_regex ]] && selector=${BASH_REMATCH[1]}
+
+    if grep -q "$selector" "$target_file"; then
+    	echo $line >> $output_pos_file
+	echo >> $output_neg_file
+    else
+	echo >> $output_pos_file
+    	echo $line >> $output_neg_file
+    fi
+done < $1
+
 # internal field seperator, change new lines delimter
 # IFS=
-# while read line; do
-#     [[ "$line" =~ $selector_regex ]] && selector=${BASH_REMATCH[1]}
-
-#     # echo $selector
-
-#     if grep -q "$selector" "$target_file"; then
-#     	echo $line >> $output_pos_file
-# 	echo >> $output_neg_file
-#     else
-# 	echo >> $output_pos_file
-#     	echo $line >> $output_neg_file
-#     fi
-# done < $1
-
 # for line in $(cat $1); do
 #     [[ "$line" =~ $selector_regex ]] && selector=${BASH_REMATCH[0]}
 
